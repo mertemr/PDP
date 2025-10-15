@@ -248,6 +248,20 @@ class SidecarConfig(Confi):
         "<green>{time}</green> | {process} | <blue>{name: <40}</blue>|<level>{level:^6} | {message}</level>",
     )
 
+    # Log level configuration
+    LOG_LEVEL = confi.str(
+        "LOG_LEVEL",
+        "INFO",
+        description="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+    )
+
+    # Health check logging configuration
+    HEALTH_CHECK_LOG_ENABLED = confi.bool(
+        "HEALTH_CHECK_LOG_ENABLED",
+        False,
+        description="Enable logging for health check endpoint requests (set to false to reduce log noise)",
+    )
+
     IS_DEBUG_MODE = confi.bool("DEBUG", None)
 
     # enables the Kong integration endpoint. This shouldn't be enabled unless needed, as it's unauthenticated

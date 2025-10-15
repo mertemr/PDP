@@ -85,6 +85,10 @@ impl PDPConfig {
                         startup_delay: 5,
                         restart_interval: 1,
                         termination_timeout: 30,
+                        uvicorn_args: "".to_string(),
+                        log_level: "INFO".to_string(),
+                        health_check_log_enabled: false,
+                        health_check_disabled: false,
                     }),
                 opa: OpaConfig::builder()
                     .env()

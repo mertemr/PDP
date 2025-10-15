@@ -273,6 +273,17 @@ def init_enforcer_api_router(policy_store: BasePolicyStoreClient = None):  # noq
 
         return JSONResponse(status_code=status.HTTP_200_OK, content={"status": "ok"})
 
+    @router.get("/healthy", status_code=status.HTTP_200_OK, include_in_schema=False)
+    async def healthy():
+        """Health check endpoint used by watchdog - logs are suppressed to avoid flooding"""
+        if await stats_manager.status():
+            return JSONResponse(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                content={"status": "unavailable"},
+            )
+
+        return JSONResponse(status_code=status.HTTP_200_OK, content={"status": "ok"})
+
     @router.post(
         "/authorized_users",
         response_model=AuthorizedUsersResult,
