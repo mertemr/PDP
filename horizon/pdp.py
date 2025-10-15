@@ -202,15 +202,27 @@ class PermitPDP:
         """
         # Clean slate
         logger.remove()
+
+        # Filter function to suppress health check logs if configured
+        def filter_health_checks(record):
+            if not sidecar_config.HEALTH_CHECK_LOG_ENABLED:
+                # Check if the log is from uvicorn access logger and is a health check
+                if record.get("name") == "uvicorn.access":
+                    message = record.get("message", "")
+                    if "/healthy" in message or "/health" in message:
+                        return False
+            return True
+
         # Logger configuration
         logger.add(
             sys.stdout,
             format=sidecar_config.TEMP_LOG_FORMAT,
-            level="INFO",
+            level=sidecar_config.LOG_LEVEL,
             backtrace=False,
             diagnose=False,
             colorize=True,
             serialize=False,
+            filter=filter_health_checks,
         )
 
     def _log_environment(self, pdp_context: dict[str, str]):

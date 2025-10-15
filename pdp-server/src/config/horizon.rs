@@ -42,6 +42,22 @@ pub struct HorizonConfig {
     /// Service termination timeout in seconds (default: 30)
     #[config(env = "PDP_HORIZON_TERMINATION_TIMEOUT", default = 30)]
     pub termination_timeout: u64,
+
+    /// Additional Uvicorn/Gunicorn arguments (e.g., "--workers 4 --timeout 120")
+    #[config(env = "PDP_HORIZON_UVICORN_ARGS", default = "")]
+    pub uvicorn_args: String,
+
+    /// Log level for Python application (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    #[config(env = "PDP_HORIZON_LOG_LEVEL", default = "INFO")]
+    pub log_level: String,
+
+    /// Enable health check request logging (default: false to reduce noise)
+    #[config(env = "PDP_HORIZON_HEALTH_CHECK_LOG_ENABLED", default = false)]
+    pub health_check_log_enabled: bool,
+
+    /// Disable health checks entirely (default: false)
+    #[config(env = "PDP_HORIZON_HEALTH_CHECK_DISABLED", default = false)]
+    pub health_check_disabled: bool,
 }
 
 impl HorizonConfig {

@@ -100,6 +100,13 @@ impl AppState {
             command.current_dir("../horizon");
         }
 
+        // Set environment variables for Python service configuration
+        command.env("PDP_LOG_LEVEL", &config.horizon.log_level);
+        command.env(
+            "PDP_HEALTH_CHECK_LOG_ENABLED",
+            config.horizon.health_check_log_enabled.to_string(),
+        );
+
         command.arg("-m");
         command.arg("uvicorn");
         command.arg("horizon.main:app");
@@ -107,6 +114,13 @@ impl AppState {
         command.arg(&config.horizon.host);
         command.arg("--port");
         command.arg(config.horizon.port.to_string());
+
+        // Add custom Uvicorn arguments if provided
+        if !config.horizon.uvicorn_args.is_empty() {
+            for arg in config.horizon.uvicorn_args.split_whitespace() {
+                command.arg(arg);
+            }
+        }
 
         let health_endpoint = format!(
             "http://{}:{}/healthy",
@@ -119,7 +133,13 @@ impl AppState {
         );
 
         let options = ServiceWatchdogOptions {
-            health_check_interval: Duration::from_secs(config.horizon.health_check_interval),
+            health_check_interval: Duration::from_secs(
+                if config.horizon.health_check_disabled {
+                    u64::MAX // Effectively disable by setting to maximum value
+                } else {
+                    config.horizon.health_check_interval
+                },
+            ),
             health_check_failure_threshold: config.horizon.health_check_failure_threshold,
             initial_startup_delay: Duration::from_secs(config.horizon.startup_delay),
             command_options: CommandWatchdogOptions {
@@ -180,6 +200,10 @@ mod tests {
                 startup_delay: 5,
                 restart_interval: 1,
                 termination_timeout: 30,
+                uvicorn_args: "".to_string(),
+                log_level: "INFO".to_string(),
+                health_check_log_enabled: false,
+                health_check_disabled: false,
             },
             opa: crate::config::opa::OpaConfig {
                 url: "http://localhost:8181".to_string(),
